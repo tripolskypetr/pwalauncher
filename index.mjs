@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { serializeError } from 'serialize-error';
 import { createRequire } from 'module'
 
 import https from 'https';
@@ -16,7 +17,7 @@ import pino from 'pino';
 const portLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'error.txt' }
+        options: { destination: 'log.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -29,7 +30,7 @@ const portLogger = pino({
 const proxyLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'error.txt' }
+        options: { destination: 'log.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -42,11 +43,37 @@ const proxyLogger = pino({
 const corsLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'error.txt' }
+        options: { destination: 'log.txt' }
     },
     formatters: {
         log: (obj) => ({
             _SOURCE: "CORS",
+            ...obj
+        }),
+    }
+});
+
+const fileLogger = pino({
+    transport: {
+        target: 'pino/file',
+        options: { destination: 'log.txt' }
+    },
+    formatters: {
+        log: (obj) => ({
+            _SOURCE: "FILE",
+            ...obj
+        }),
+    }
+});
+
+const errorLogger = pino({
+    transport: {
+        target: 'pino/file',
+        options: { destination: 'error.txt' }
+    },
+    formatters: {
+        log: (obj) => ({
+            _SOURCE: "ERROR",
             ...obj
         }),
     }
@@ -80,6 +107,10 @@ app.options('*', (req, res) => {
 });
 
 app.use("/cors/", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
     const url = req.url.replace('/', '');
     corsLogger.info(`RESTREAM url=${url} date=${new Date().toString()}`);
     try {
@@ -154,14 +185,31 @@ config.proxy?.forEach(({ path, link }) => {
     );
 });
 
-app.use(express.static(path.join(process.cwd(), 'wwwroot')));
+app.use((req, res, next) => {
+    fileLogger.info(req.url);
+    next();
+}, express.static(path.join(process.cwd(), 'wwwroot')));
 
-app.get("*", (_, res) => {
+app.get("*", (req, res) => {
+    fileLogger.error(req.url);
     res.sendFile(path.join(process.cwd(), "./wwwroot/index.html"));
 });
 
-process.on('uncaughtException', console.log);
-process.on('unhandledRejection', console.log);
+app.use((error, req, res, next) => {
+    errorLogger.error(serializeError(error));
+    res.status(500).json({
+        error: true,
+    });
+})
+
+process.once('uncaughtException', (error) => {
+    errorLogger.error(serializeError(error))
+});
+
+process.once('unhandledRejection', (error) => {
+    throw error;
+});
+
 
 if (config.ssl) {
     https.createServer({
