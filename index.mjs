@@ -9,7 +9,6 @@ import path from 'path';
 import fs from 'fs';
 
 import express from "express";
-import cors from "cors";
 import nocache from 'nocache';
 import jwt from "jsonwebtoken";
 import pino from 'pino';
@@ -53,7 +52,6 @@ const corsLogger = pino({
     }
 });
 
-
 const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
@@ -72,7 +70,14 @@ config.port = config.port ?? 80;
 const app = express();
 
 app.use(nocache());
-app.use(cors());
+
+app.options('*', (req, res) => {
+    res.setHeader(`Access-Control-Allow-Origin`, req.headers.origin || req.hostname || '*');
+    res.setHeader("Access-Control-Allow-Headers", req.headers['access-control-request-headers'] || "*");
+    res.setHeader(`Access-Control-Allow-Methods`, `GET,POST,PUT,PATCH,DELETE`);
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.sendStatus(200);
+});
 
 app.use("/cors/", async (req, res) => {
     const url = req.url.replace('/', '');
@@ -125,7 +130,7 @@ config.ports?.forEach((port) => {
                 res.status(500).json({
                     error: true,
                 });
-            }
+            },
         })
     );
 });
@@ -144,7 +149,7 @@ config.proxy?.forEach(({ path, link }) => {
                 res.status(500).json({
                     error: true,
                 });
-            }
+            },
         })
     );
 });
