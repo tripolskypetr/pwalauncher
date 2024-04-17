@@ -6,9 +6,22 @@
   "bin": "index.mjs",
   "scripts": {
     "start": "node index.mjs",
-    "test": "node index.mjs ./sample/pwalauncher.js"
+    "create-ssl": "sh ./scripts/create-ssl.sh",
+    "test": "node --inspect-brk index.mjs"
   },
-  "keywords": ["react-declarative", "pwa"],
+  "keywords": [
+    "react-declarative",
+    "pwa"
+  ],
   "author": "Petr Tripolskiy",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-cors-anywhere": "^0.0.1-alpha.3",
+    "http-proxy-middleware": "^3.0.0",
+    "jsonwebtoken": "8.5.1",
+    "nocache": "^4.0.0"
+  }
 }
