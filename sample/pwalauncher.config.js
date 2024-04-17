@@ -16,7 +16,7 @@ module.exports = {
     proxy: [
         {
             path: 'v1',
-            link: 'http://127.0.0.1:8080/v1/'
+            link: 'http://127.0.0.1:8080/v1'
         }
     ],
     ssl: {
