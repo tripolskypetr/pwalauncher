@@ -16,12 +16,11 @@
   "author": "Petr Tripolskiy",
   "license": "MIT",
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "express-cors-anywhere": "^0.0.1-alpha.3",
-    "http-proxy-middleware": "^3.0.0",
+    "cors": "2.8.5",
+    "express": "4.19.2",
+    "http-proxy-middleware": "2.0.6",
     "jsonwebtoken": "8.5.1",
-    "nocache": "^4.0.0"
+    "nocache": "4.0.0",
+    "pino": "8.20.0"
   }
 }
