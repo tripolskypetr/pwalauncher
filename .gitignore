@@ -4,4 +4,4 @@ ssl
 /error.txt
 /info.txt
 /log.txt
-/pwalauncher.config.js
+/pwalauncher.config.cjs

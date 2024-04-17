@@ -97,16 +97,17 @@ const httpLogger = pino({
 const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
-const [configPath = "./pwalauncher.config.js"] = args;
+const [configPath = "./pwalauncher.config.cjs"] = args;
+const modulePath = path.resolve(process.cwd(), configPath);
 
-if (!fs.existsSync(configPath)) {
-    console.log(`${path.resolve(process.cwd(), configPath)} not found`);
+if (!fs.existsSync(modulePath)) {
+    console.log(`${modulePath} not found`);
     console.log('Prese read the manual: https://github.com/react-declarative/pwalauncher');
     console.log();
     process.exit(-1);
 }
 
-const config = require(configPath);
+const config = require(modulePath);
 config.port = config.port ?? 80;
 
 const app = express();

@@ -1,12 +1,13 @@
 {
   "name": "pwalauncher",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The PWA launcher for react-declarative",
   "main": "index.mjs",
   "bin": "index.mjs",
   "scripts": {
     "start": "node index.mjs",
-    "create-ssl": "sh ./scripts/create-ssl.sh",
+    "create-ssl-ip": "sh ./scripts/create-ssl-ip.sh",
+    "create-ssl-host": "sh ./scripts/create-ssl-host.sh",
     "test": "node --inspect-brk index.mjs"
   },
   "keywords": [
