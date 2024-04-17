@@ -9,6 +9,8 @@ import http from 'http';
 import path from 'path';
 import fs from 'fs';
 
+import pinoExpress from "pino-express";
+
 import express from "express";
 import nocache from 'nocache';
 import jwt from "jsonwebtoken";
@@ -17,7 +19,7 @@ import pino from 'pino';
 const portLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'log.txt' }
+        options: { destination: 'info.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -30,7 +32,7 @@ const portLogger = pino({
 const proxyLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'log.txt' }
+        options: { destination: 'info.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -43,7 +45,7 @@ const proxyLogger = pino({
 const corsLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'log.txt' }
+        options: { destination: 'info.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -56,7 +58,7 @@ const corsLogger = pino({
 const fileLogger = pino({
     transport: {
         target: 'pino/file',
-        options: { destination: 'log.txt' }
+        options: { destination: 'info.txt' }
     },
     formatters: {
         log: (obj) => ({
@@ -79,6 +81,19 @@ const errorLogger = pino({
     }
 });
 
+const httpLogger = pino({
+    transport: {
+        target: 'pino/file',
+        options: { destination: 'log.txt' }
+    },
+    formatters: {
+        log: (obj) => ({
+            _SOURCE: "HTTP",
+            ...obj
+        }),
+    }
+});
+
 const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
@@ -96,6 +111,7 @@ config.port = config.port ?? 80;
 
 const app = express();
 
+app.use(pinoExpress(httpLogger));
 app.use(nocache());
 
 app.options('*', (req, res) => {
@@ -146,43 +162,41 @@ if (config.jwtSecret) {
 }
 
 config.ports?.forEach((port) => {
-    app.use(
-        `/${port}/*`,
-        createProxyMiddleware({
-            target: `http://127.0.0.1:${port}`,
-            changeOrigin: true,
-            ws: true,
-            logger: portLogger,
-            pathRewrite: {
-                [`^/${port}/`]: '/',
-            },
-            onError: (err, req, res) => {
-                portLogger.warn(err);
-                res.status(500).json({
-                    error: true,
-                });
-            },
-        })
-    );
+    const middleware = createProxyMiddleware({
+        target: `http://127.0.0.1:${port}`,
+        changeOrigin: true,
+        ws: true,
+        logger: portLogger,
+        pathRewrite: (path, req) => {
+            return path.replace(`/${port}`, '');
+        },
+        onError: (err, req, res) => {
+            portLogger.warn(err);
+            res.status(500).json({
+                error: true,
+            });
+        },
+    });
+    app.use(`/${port}`, middleware);
+    app.use(`/${port}/*`, middleware);
 });
 
 config.proxy?.forEach(({ path, link }) => {
     const endpoint = `/${path}`;
-    app.use(
-        endpoint,
-        createProxyMiddleware({
-            target: link.replace(endpoint, ''),
-            changeOrigin: true,
-            ws: true,
-            logger: proxyLogger,
-            onError: (err, req, res) => {
-                proxyLogger.warn(err);
-                res.status(500).json({
-                    error: true,
-                });
-            },
-        })
-    );
+    const middleware = createProxyMiddleware({
+        target: link.replace(endpoint, ''),
+        changeOrigin: true,
+        ws: true,
+        logger: proxyLogger,
+        onError: (err, req, res) => {
+            proxyLogger.warn(err);
+            res.status(500).json({
+                error: true,
+            });
+        },
+    });
+    app.use(endpoint, middleware);
+    app.use(`${endpoint}/*`, middleware);
 });
 
 app.use((req, res, next) => {

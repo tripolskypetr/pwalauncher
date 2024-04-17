@@ -22,6 +22,7 @@
     "jsonwebtoken": "8.5.1",
     "nocache": "4.0.0",
     "pino": "8.20.0",
+    "pino-express": "1.1.1",
     "serialize-error": "11.0.3"
   }
 }
