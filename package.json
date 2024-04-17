@@ -21,6 +21,7 @@
     "http-proxy-middleware": "2.0.6",
     "jsonwebtoken": "8.5.1",
     "nocache": "4.0.0",
-    "pino": "8.20.0"
+    "pino": "8.20.0",
+    "dotenv": "16.4.5"
   }
 }
