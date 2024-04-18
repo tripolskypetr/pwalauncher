@@ -115,6 +115,16 @@ const app = express();
 app.use(pinoExpress(httpLogger));
 app.use(nocache());
 
+if (config.redirectHttps) {
+    app.use('*', (req, res, next) => {
+        if (req.protocol !== 'https') {
+            res.redirect("https://" + req.headers.host + req.path);
+            return;
+        }
+        next();
+    });
+}
+
 app.options('*', (req, res) => {
     res.setHeader(`Access-Control-Allow-Origin`, req.headers.origin || req.hostname || '*');
     res.setHeader("Access-Control-Allow-Headers", req.headers['access-control-request-headers'] || "*");
@@ -146,7 +156,7 @@ app.use("/cors/", async (req, res) => {
 
 if (config.jwtSecret) {
     config.ports?.forEach((port) => {
-        app.use(`/${port}`, (req, res, next) => {
+        const middleware = (req, res, next) => {
             const authorizationHeader = req.headers && 'Authorization' in req.headers ? 'Authorization' : 'authorization';
             if (req.headers && req.headers[authorizationHeader]) {
                 const [scheme, credentials] = req.headers[authorizationHeader].split(' ');
@@ -162,7 +172,9 @@ if (config.jwtSecret) {
                 }
             }
             res.status(401).json({ error: 'jwt' });
-        });
+        };
+        app.use(`/${port}`, middleware);
+        app.use(`/${port}/*`, middleware);
     })
 }
 

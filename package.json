@@ -1,6 +1,6 @@
 {
   "name": "pwalauncher",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "The PWA launcher for react-declarative",
   "main": "index.mjs",
   "bin": "index.mjs",
@@ -12,10 +12,29 @@
   },
   "keywords": [
     "react-declarative",
-    "pwa"
+    "pwa",
+    "reverse-proxy",
+    "https",
+    "http",
+    "port-forwarding",
+    "path-proxy",
+    "cors",
+    "mixed-content",
+    "same-origin",
+    "websocket"
   ],
-  "author": "Petr Tripolskiy",
   "license": "MIT",
+  "author": {
+    "name": "Petr Tripolsky",
+    "email": "tripolskypetr@gmail.com",
+    "url": "https://github.com/tripolskypetr"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "http://paypal.me/tripolskypetr"
+  },
+  "homepage": "https://github.com/tripolskypetr/pwalauncher",
+  "repository": "https://github.com/tripolskypetr/pwalauncher",
   "dependencies": {
     "dotenv": "16.4.5",
     "express": "4.19.2",

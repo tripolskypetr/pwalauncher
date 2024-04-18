@@ -26,5 +26,6 @@ module.exports = {
     },
     sslPort: 444,
     jwtSecret: "TEST",
-    port: 80
+    port: 80,
+    redirectHttps: false,
 };
