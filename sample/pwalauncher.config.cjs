@@ -24,6 +24,7 @@ module.exports = {
         cert: fs.readFileSync('./ssl/certificate.crt', 'utf8'),
         ca: fs.readFileSync('./ssl/ca_bundle.crt', 'utf8'),
     },
+    sslPort: 444,
     jwtSecret: "TEST",
     port: 80
 };

@@ -151,9 +151,13 @@ if (config.jwtSecret) {
             if (req.headers && req.headers[authorizationHeader]) {
                 const [scheme, credentials] = req.headers[authorizationHeader].split(' ');
                 if (/^Bearer$/i.test(scheme)) {
-                    if (jwt.verify(credentials, config.jwtSecret)) {
-                        next();
-                        return;
+                    try {
+                        if (jwt.verify(credentials, config.jwtSecret)) {
+                            next();
+                            return;
+                        }
+                    } catch (error) {
+                        errorLogger.error(serializeError(error));
                     }
                 }
             }
@@ -225,19 +229,19 @@ process.once('unhandledRejection', (error) => {
     throw error;
 });
 
-
 if (config.ssl) {
+    const port = config.sslPort || 443;
     https.createServer({
         ...config.ssl,
-        requestCert: true,
-        rejectUnauthorized: true
-    }, app).listen(443, "0.0.0.0").addListener('listening', () => {
-        console.log('Server started: PORT=443 SSL');
+        // requestCert: true,
+        // rejectUnauthorized: true
+    }, app).listen(port, "0.0.0.0").addListener('listening', () => {
+        console.log(`Server started: PORT=${port} SSL`);
     });
 }
 
 if (config.port) {
     http.createServer(app).listen(config.port, "0.0.0.0").addListener('listening', () => {
-        console.log(`Server started PORT=${config.port}`);
+        console.log(`Server started: PORT=${config.port}`);
     });
 }
