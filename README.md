@@ -11,27 +11,27 @@ pwalauncher # Will share `wwwroot` subfolder with static assets and redirect to 
 
 ## Benefits
 
-1. Free SSL Certificate obuse
+1. **Free SSL Certificate obuse**
 
 Create a [ZeroSSL](https://zerossl.com/) 90-days sertificate for single domain and multiply it to several websites shared on different ports
 
-2. Port forward over SSL
+2. **Port forward over SSL**
 
 Forwarding `https://example.com/8081` to `http://localhost:8081`. Both websoket and http forwarding are supported
 
-3. JWT Validation for each forwarded port
+3. **JWT Validation for each forwarded port**
 
 While forwarding to `http://localhost:8081` the `pwalauncher` can intercept `Authorization: Bearer <token>` header and validate the token. The UI can sign a token every 10 seconds to avoid DDOS
 
-4. CRA-like API proxy
+4. **CRA-like API proxy**
 
 Request to `https://example.com/v1` can be forwarded to `https://cloud.appwrite.io/v1`
 
-4. Cors-everywhere like file download proxy
+4. **Cors-everywhere like file download proxy**
 
 Fetch from `https://example.com/cors/http://filedownload.com/demo.mp3` will download `http://filedownload.com/demo.mp3` ignoring mixed content and cord origin policy
 
-5. Mutal SSL auth on a server side
+5. **Mutal SSL auth on a server side**
 
 A self-signed SSL certificate installed localy can be used to restrict access to application authorisation with second layer of authentification
 
