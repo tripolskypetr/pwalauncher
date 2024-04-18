@@ -20,8 +20,9 @@ module.exports = {
         }
     ],
     ssl: {
-        key: fs.readFileSync('./ssl/test.key', 'utf8'),
-        cert: fs.readFileSync('./ssl/test.crt', 'utf8')
+        key: fs.readFileSync('./ssl/private.key', 'utf8'),
+        cert: fs.readFileSync('./ssl/certificate.crt', 'utf8'),
+        ca: fs.readFileSync('./ssl/ca_bundle.crt', 'utf8'),
     },
     jwtSecret: "TEST",
     port: 80

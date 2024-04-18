@@ -5,3 +5,5 @@ ssl
 /info.txt
 /log.txt
 /pwalauncher.config.cjs
+*.key
+*.crt
