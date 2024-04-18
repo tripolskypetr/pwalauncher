@@ -109,6 +109,7 @@ if (!fs.existsSync(modulePath)) {
 
 const config = require(modulePath);
 config.port = config.port ?? 80;
+config.wwwroot = config.wwwroot || 'wwwroot';
 
 const app = express();
 
@@ -219,11 +220,11 @@ config.proxy?.forEach(({ path, link }) => {
 app.use((req, res, next) => {
     fileLogger.info(req.url);
     next();
-}, express.static(path.join(process.cwd(), 'wwwroot')));
+}, express.static(path.join(process.cwd(), config.wwwroot)));
 
 app.get("*", (req, res) => {
     fileLogger.error(req.url);
-    res.sendFile(path.join(process.cwd(), "./wwwroot/index.html"));
+    res.sendFile(path.join(process.cwd(), config.wwwroot, "index.html"));
 });
 
 app.use((error, req, res, next) => {

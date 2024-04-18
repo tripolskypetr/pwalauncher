@@ -102,5 +102,6 @@ module.exports = {
     jwtSecret: "TEST",
     port: 80,
     redirectHttps: false,
+    wwwroot: "build"
 };
 ```
