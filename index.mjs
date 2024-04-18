@@ -228,17 +228,16 @@ process.once('unhandledRejection', (error) => {
 
 if (config.ssl) {
     https.createServer({
-        key: config.ssl.key,
-        cert: config.ssl.cert,
+        ...config.ssl,
         requestCert: true,
         rejectUnauthorized: true
-    }, app).listen(443).addListener('listening', () => {
+    }, app).listen(443, "0.0.0.0").addListener('listening', () => {
         console.log('Server started: PORT=443 SSL');
     });
 }
 
 if (config.port) {
-    http.createServer(app).listen(config.port).addListener('listening', () => {
+    http.createServer(app).listen(config.port, "0.0.0.0").addListener('listening', () => {
         console.log(`Server started PORT=${config.port}`);
     });
 }
