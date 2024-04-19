@@ -18,6 +18,7 @@
     "http",
     "port-forwarding",
     "path-proxy",
+    "proxy",
     "cors",
     "mixed-content",
     "same-origin",
