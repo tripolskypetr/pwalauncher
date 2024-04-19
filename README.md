@@ -102,6 +102,7 @@ module.exports = {
     jwtSecret: "TEST",
     cookieSecret: true,
     cookieSecretAllowed: ['/', '/index.html', '/favicon.ico'],
+    ipBlacklist: ["95.173.136.72"],
     port: 80,
     redirectHttps: false,
     wwwroot: "build"

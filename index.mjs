@@ -130,12 +130,32 @@ const config = require(modulePath);
 config.port = config.port ?? 80;
 config.wwwroot = config.wwwroot ?? 'wwwroot';
 config.cookieSecretAllowed = config.cookieSecretAllowed ?? ["/", "/index.html", "/favicon.ico"];
+config.ipBlacklist = config.ipBlacklist ?? [];
 
 const app = express();
 
 app.use(pinoExpress(httpLogger));
 app.use(cookieParser());
 app.use(nocache());
+
+{
+    const validateBlacklist = (req, res, next) => {
+        if (config.ipBlacklist.includes(req.ip)) {
+            errorLogger.error({
+                unauthirizedAccess: true,
+                ip: req.ip,
+            });
+            res.status(404).send("Not found");
+            return;
+        }
+        next();
+    }
+    app.get('*', validateBlacklist);
+    app.post('*', validateBlacklist);
+    app.put('*', validateBlacklist);
+    app.patch('*', validateBlacklist);
+    app.delete('*', validateBlacklist);
+}
 
 if (config.cookieSecret) {
     const validateCookie = (req, res, next) => {
@@ -151,9 +171,7 @@ if (config.cookieSecret) {
             unauthirizedAccess: true,
             ip: req.ip,
         });
-        res.status(500).json({
-            success: false,
-        });
+        res.status(404).send("Not found");
     }
     app.get('*', validateCookie);
     app.post('*', validateCookie);
