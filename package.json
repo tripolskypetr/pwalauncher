@@ -21,7 +21,9 @@
     "cors",
     "mixed-content",
     "same-origin",
-    "websocket"
+    "websocket",
+    "osint",
+    "honeypot"
   ],
   "license": "MIT",
   "author": {
