@@ -22,7 +22,8 @@ import pino from 'pino';
 const randomString = () => {
     const buffer = Buffer.alloc(16);
     uuid.v4({}, buffer);
-    return buffer.toString('hex');
+    const str = buffer.toString('hex');
+    return str.slice(Math.floor(Math.random() * 10), str.length);
 };
 
 const portLogger = pino({
