@@ -236,7 +236,7 @@ if (config.jwtSecret) {
                     }
                 }
             }
-            res.status(401).json({ error: 'jwt' });
+            res.status(404).send("Not found");
         };
         app.use(`/${port}`, middleware);
         app.use(`/${port}/*`, middleware);
