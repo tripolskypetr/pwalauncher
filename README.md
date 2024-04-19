@@ -100,6 +100,8 @@ module.exports = {
     },
     sslPort: 444,
     jwtSecret: "TEST",
+    cookieSecret: true,
+    cookieSecretAllowed: ['/', '/index.html', '/favicon.ico'],
     port: 80,
     redirectHttps: false,
     wwwroot: "build"

@@ -1,6 +1,6 @@
 {
   "name": "pwalauncher",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "The PWA launcher for react-declarative",
   "main": "index.mjs",
   "bin": "index.mjs",
@@ -36,6 +36,7 @@
   "homepage": "https://github.com/tripolskypetr/pwalauncher",
   "repository": "https://github.com/tripolskypetr/pwalauncher",
   "dependencies": {
+    "cookie-parser": "1.4.6",
     "dotenv": "16.4.5",
     "express": "4.19.2",
     "http-proxy-middleware": "2.0.6",
@@ -43,6 +44,7 @@
     "nocache": "4.0.0",
     "pino": "8.20.0",
     "pino-express": "1.1.1",
-    "serialize-error": "11.0.3"
+    "serialize-error": "11.0.3",
+    "uuid": "9.0.1"
   }
 }

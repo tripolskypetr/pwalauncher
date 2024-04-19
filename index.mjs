@@ -4,17 +4,26 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import { serializeError } from 'serialize-error';
 import { createRequire } from 'module'
 
+import * as uuid from 'uuid';
+
 import https from 'https';
 import http from 'http';
 import path from 'path';
 import fs from 'fs';
 
 import pinoExpress from "pino-express";
+import cookieParser from "cookie-parser";
 
 import express from "express";
 import nocache from 'nocache';
 import jwt from "jsonwebtoken";
 import pino from 'pino';
+
+const randomString = () => {
+    const buffer = Buffer.alloc(16);
+    uuid.v4({}, buffer);
+    return buffer.toString('hex');
+};
 
 const portLogger = pino({
     transport: {
@@ -96,6 +105,15 @@ const httpLogger = pino({
 
 const require = createRequire(import.meta.url);
 
+const SECRET_COOKIE_KEY = randomString();
+const SECRET_COOKIE_VALUE = randomString();
+
+const SECRET_COOKIE_OPTIONS = {
+    maxAge: 1000 * 60 * 24 * 60,
+    httpOnly: true,
+    signed: false,
+};
+
 const args = process.argv.slice(2);
 const [configPath = "./pwalauncher.config.cjs"] = args;
 const modulePath = path.resolve(process.cwd(), configPath);
@@ -109,12 +127,39 @@ if (!fs.existsSync(modulePath)) {
 
 const config = require(modulePath);
 config.port = config.port ?? 80;
-config.wwwroot = config.wwwroot || 'wwwroot';
+config.wwwroot = config.wwwroot ?? 'wwwroot';
+config.cookieSecretAllowed = config.cookieSecretAllowed ?? ["/", "/index.html", "/favicon.ico"];
 
 const app = express();
 
 app.use(pinoExpress(httpLogger));
+app.use(cookieParser());
 app.use(nocache());
+
+if (config.cookieSecret) {
+    const validateCookie = (req, res, next) => {
+        if (config.cookieSecretAllowed.includes(req.url)) {
+            next();
+            return;
+        }
+        if (req.cookies[SECRET_COOKIE_KEY] === SECRET_COOKIE_VALUE) {
+            next();
+            return;
+        }
+        errorLogger.error({
+            unauthirizedAccess: true,
+            ip: req.ip,
+        });
+        res.status(500).json({
+            error: true,
+        });
+    }
+    app.get('*', validateCookie);
+    app.post('*', validateCookie);
+    app.put('*', validateCookie);
+    app.patch('*', validateCookie);
+    app.delete('*', validateCookie);
+}
 
 if (config.redirectHttps) {
     app.use('*', (req, res, next) => {
@@ -223,7 +268,9 @@ app.use((req, res, next) => {
 }, express.static(path.join(process.cwd(), config.wwwroot)));
 
 app.get("*", (req, res) => {
-    fileLogger.error(req.url);
+    if (config.cookieSecretAllowed.includes(req.url)) {
+        res.cookie(SECRET_COOKIE_KEY, SECRET_COOKIE_VALUE, SECRET_COOKIE_OPTIONS);
+    }
     res.sendFile(path.join(process.cwd(), config.wwwroot, "index.html"));
 });
 
