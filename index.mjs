@@ -152,7 +152,7 @@ if (config.cookieSecret) {
             ip: req.ip,
         });
         res.status(500).json({
-            error: true,
+            success: false,
         });
     }
     app.get('*', validateCookie);
