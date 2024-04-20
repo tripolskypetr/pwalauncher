@@ -109,3 +109,7 @@ module.exports = {
 ## Self-signed SSL Setup
 
 If you getting trouble while trying to setup self-signed ssl, check the [3rdparty folder](./3rdparty/). The `SSLCertificateMaker.exe` will help you create root certificate (CA) for client devices and self-signed children (CERT) for the server. The `CertTrustManager.exe` will help you create a one-button setup file for root certificate (CA), to create that file right click on CertTrustManager window. 
+
+![screenshot](./docs/screenshot.png)
+
+P.S. If you choose wrong certificate in modal run `chrome://restart` to choose It again or use Edge
