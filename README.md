@@ -93,10 +93,6 @@ module.exports = {
     ssl: {
         key: fs.readFileSync('./ssl/private.key', 'utf8'),
         cert: fs.readFileSync('./ssl/certificate.crt', 'utf8'),
-        ca: fs.readFileSync('./ssl/ca_bundle.crt', 'utf8'),
-        // for server-side ssl validation
-        // requestCert: true,
-        // rejectUnauthorized: true
     },
     sslPort: 444,
     sslVerify: true,
@@ -109,3 +105,7 @@ module.exports = {
     wwwroot: "build"
 };
 ```
+
+## Self-signed SSL Setup
+
+If you getting trouble while trying to setup self-signed ssl, check the [3rdparty folder](./3rdparty/). The `SSLCertificateMaker.exe` will help you create root certificate (CA) for client devices and self-signed children (CERT) for the server. The `CertTrustManager.exe` will help you create a one-button setup file for root certificate (CA), to create that file right click on CertTrustManager window. 
