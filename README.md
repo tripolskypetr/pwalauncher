@@ -99,7 +99,7 @@ module.exports = {
         // rejectUnauthorized: true
     },
     sslPort: 444,
-    sslVerifySerial: false,
+    sslVerify: true,
     jwtSecret: "TEST",
     cookieSecret: true,
     cookieSecretAllowed: ['/', '/index.html', '/favicon.ico'],

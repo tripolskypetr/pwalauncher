@@ -342,14 +342,17 @@ process.once("unhandledRejection", (error) => {
 
 if (config.ssl) {
   const port = config.sslPort || 443;
-  const serialNumber = getSslSerial();
   https
     .createServer(
-      getSslArgs(),
-      config.sslVerifySerial
+      {
+        ...getSslArgs(),
+        rejectUnauthorized: false,
+        requestCert: true,
+      },
+      config.sslVerify
         ? (req, res) => {
-            const cert = req.socket.getCertificate();
-            if (cert.serialNumber !== serialNumber) {
+            const cert = req.socket.getPeerCertificate();
+            if (!cert || !Object.keys(cert).length) {
               res.writeHead(200);
               res.write("Not found");
               res.end();
