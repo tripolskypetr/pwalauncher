@@ -110,6 +110,8 @@ const require = createRequire(import.meta.url);
 const SECRET_COOKIE_KEY = randomString();
 const SECRET_COOKIE_VALUE = randomString();
 
+const MAX_HTTP_AGENT_SOCKETS = 10_000;
+
 const SECRET_COOKIE_OPTIONS = {
   maxAge: 1000 * 60 * 24 * 60,
   httpOnly: true,
@@ -275,6 +277,9 @@ if (config.jwtSecret) {
 config.ports?.forEach((port) => {
   const middleware = createProxyMiddleware({
     target: `http://127.0.0.1:${port}`,
+    agent: new http.Agent({
+      maxSockets: MAX_HTTP_AGENT_SOCKETS,
+    }),
     changeOrigin: true,
     ws: true,
     logger: portLogger,
@@ -296,6 +301,9 @@ config.proxy?.forEach(({ path, link }) => {
   const endpoint = `/${path}`;
   const middleware = createProxyMiddleware({
     target: link.replace(endpoint, ""),
+    agent: new http.Agent({
+      maxSockets: MAX_HTTP_AGENT_SOCKETS,
+    }),
     changeOrigin: true,
     ws: true,
     logger: proxyLogger,

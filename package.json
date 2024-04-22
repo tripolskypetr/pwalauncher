@@ -1,6 +1,6 @@
 {
   "name": "pwalauncher",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "The PWA launcher for react-declarative",
   "main": "index.mjs",
   "bin": "index.mjs",
