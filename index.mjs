@@ -20,6 +20,8 @@ import nocache from "nocache";
 import jwt from "jsonwebtoken";
 import pino from "pino";
 
+const require = createRequire(import.meta.url);
+
 const randomString = () => {
   const buffer = Buffer.alloc(16);
   uuid.v4({}, buffer);
@@ -29,8 +31,8 @@ const randomString = () => {
 
 const portLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "info.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "port.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -42,8 +44,8 @@ const portLogger = pino({
 
 const proxyLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "info.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "proxy.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -55,8 +57,8 @@ const proxyLogger = pino({
 
 const corsLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "info.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "cors.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -68,8 +70,8 @@ const corsLogger = pino({
 
 const fileLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "info.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "file.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -81,8 +83,8 @@ const fileLogger = pino({
 
 const errorLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "error.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "error.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -94,8 +96,8 @@ const errorLogger = pino({
 
 const httpLogger = pino({
   transport: {
-    target: "pino/file",
-    options: { destination: "log.txt" },
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "http.txt" },
   },
   formatters: {
     log: (obj) => ({
@@ -104,8 +106,6 @@ const httpLogger = pino({
     }),
   },
 });
-
-const require = createRequire(import.meta.url);
 
 const SECRET_COOKIE_KEY = randomString();
 const SECRET_COOKIE_VALUE = randomString();

@@ -7,3 +7,4 @@ ssl
 /pwalauncher.config.cjs
 *.key
 *.crt
+logs
