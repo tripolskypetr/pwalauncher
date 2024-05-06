@@ -122,7 +122,7 @@ const args = process.argv.slice(2);
 const [configPath = "./pwalauncher.config.cjs"] = args;
 const modulePath = path.resolve(process.cwd(), configPath);
 
-if (!fs.existsSync(modulePath)) {
+if (!fs.existsSync(require.resolve(modulePath))) {
   console.log(`${modulePath} not found`);
   console.log(
     "Prese read the manual: https://github.com/react-declarative/pwalauncher",
