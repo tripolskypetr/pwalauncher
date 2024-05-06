@@ -362,7 +362,7 @@ if (config.ssl) {
         ? (req, res) => {
             const cert = req.socket.getPeerCertificate();
             if (!cert || !Object.keys(cert).length || cert?.serialNumber !== serialNumber) {
-              res.writeHead(200);
+              res.writeHead(404);
               res.write("Not found");
               res.end();
               return;
