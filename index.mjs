@@ -107,9 +107,6 @@ const httpLogger = pino({
   },
 });
 
-const SECRET_COOKIE_KEY = randomString();
-const SECRET_COOKIE_VALUE = randomString();
-
 const MAX_HTTP_AGENT_SOCKETS = 10_000;
 
 const SECRET_COOKIE_OPTIONS = {
@@ -139,6 +136,14 @@ config.cookieSecretAllowed = config.cookieSecretAllowed ?? [
   "/favicon.ico",
 ];
 config.ipBlacklist = config.ipBlacklist ?? [];
+
+const { SECRET_COOKIE_KEY, SECRET_COOKIE_VALUE } = typeof config.cookieSecret === 'object' ? {
+  SECRET_COOKIE_KEY: config.SECRET_COOKIE_KEY,
+  SECRET_COOKIE_VALUE: config.SECRET_COOKIE_VALUE,
+}: {
+  SECRET_COOKIE_KEY: randomString(),
+  SECRET_COOKIE_VALUE: randomString(),
+};
 
 const getSslArgs = () => ({
   key: config.ssl.key,
