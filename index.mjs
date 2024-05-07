@@ -138,8 +138,8 @@ config.cookieSecretAllowed = config.cookieSecretAllowed ?? [
 config.ipBlacklist = config.ipBlacklist ?? [];
 
 const { SECRET_COOKIE_KEY, SECRET_COOKIE_VALUE } = typeof config.cookieSecret === 'object' ? {
-  SECRET_COOKIE_KEY: config.cookieSecret.SECRET_COOKIE_KEY,
-  SECRET_COOKIE_VALUE: config.cookieSecret.SECRET_COOKIE_VALUE,
+  SECRET_COOKIE_KEY: config.cookieSecret.key,
+  SECRET_COOKIE_VALUE: config.cookieSecret.value,
 }: {
   SECRET_COOKIE_KEY: randomString(),
   SECRET_COOKIE_VALUE: randomString(),
