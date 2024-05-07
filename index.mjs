@@ -111,7 +111,7 @@ const MAX_HTTP_AGENT_SOCKETS = 10_000;
 
 const SECRET_COOKIE_OPTIONS = {
   maxAge: 1000 * 60 * 24 * 60,
-  httpOnly: true,
+  httpOnly: false,
   signed: false,
 };
 
