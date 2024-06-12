@@ -40,7 +40,7 @@ const restreamLogger = pino({
   },
   formatters: {
     log: (obj) => ({
-      _SOURCE: "PORT",
+      _SOURCE: "RESTREAM",
       ...obj,
     }),
   },
