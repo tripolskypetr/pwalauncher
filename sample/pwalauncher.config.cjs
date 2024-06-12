@@ -25,6 +25,7 @@ module.exports = {
         ca: fs.readFileSync('./ssl/ca_bundle.crt', 'utf8'),
     },
     sslPort: 444,
+    sslRedirectPort: 444,
     sslVerify: false,
     jwtSecret: "TEST",
     cookieSecret: {
