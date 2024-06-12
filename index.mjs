@@ -33,6 +33,19 @@ const randomString = () => {
   return str.slice(Math.floor(Math.random() * 10), str.length);
 };
 
+const restreamLogger = pino({
+  transport: {
+    target: require.resolve('./logger.mjs'),
+    options: { filename: "restream.txt" },
+  },
+  formatters: {
+    log: (obj) => ({
+      _SOURCE: "PORT",
+      ...obj,
+    }),
+  },
+});
+
 const portLogger = pino({
   transport: {
     target: require.resolve('./logger.mjs'),
@@ -410,6 +423,7 @@ if (config.socketRestream) {
 
   emitter.on('event', (data) => {
     clients.forEach((client) => {
+      restreamLogger.info(data);
       client.write(JSON.stringify(data));
     });
   });
