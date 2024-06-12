@@ -13,9 +13,13 @@ import tls from "tls";
 import fs from "fs";
 
 import pinoExpress from "pino-express";
+import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
+import EventEmitter from "events";
+
 import express from "express";
+import sockjs from "sockjs";
 import nocache from "nocache";
 import jwt from "jsonwebtoken";
 import pino from "pino";
@@ -138,7 +142,6 @@ config.cookieSecretAllowed = config.cookieSecretAllowed ?? [
 config.ipBlacklist = config.ipBlacklist ?? [];
 
 {
-  const EventEmitter = require('events');
   if (config.ports) {
     EventEmitter.defaultMaxListeners += config.ports.length;
   }
@@ -169,6 +172,13 @@ const getSslSerial = () => {
 };
 
 const app = express();
+
+app.use((req, res, next) => {
+  if (req.url === "/restream_listen") {
+    return;
+  }
+  next();
+});
 
 app.use(pinoExpress(httpLogger));
 app.use(cookieParser());
@@ -376,40 +386,87 @@ process.once("unhandledRejection", (error) => {
   throw error;
 });
 
+const sockjsServer = sockjs.createServer();
+
+if (config.socketRestream) {
+
+  const emitter = new EventEmitter();
+
+  const clients = [];
+
+  sockjsServer.on('connection', (conn) => {
+    clients.push(conn);
+    conn.on('close', () => {
+      const index = clients.indexOf(conn);
+      if (index !== -1) {
+        clients.splice(index, 1);
+      }
+    });
+  });
+
+  emitter.on('event', (data) => {
+    clients.forEach((client) => {
+      client.write(JSON.stringify(data));
+    });
+  });
+
+  app.post("/restream_event", bodyParser.json(), (req, res) => {
+    const userId = req.header("x-appwrite-webhook-user-id");
+    const projectId = req.header("x-appwrite-webhook-project-id");
+    const events = req.header("x-appwrite-webhook-events");
+    const timestamp = Date.now();
+    const payload = req.body;
+    emitter.emit("event", {
+      userId,
+      projectId,
+      events,
+      timestamp,
+      payload,
+    });
+    res.status(200).send("ok");
+  });
+}
+
 if (config.ssl) {
   const port = config.sslPort || 443;
   const serialNumber = getSslSerial();
-  https
-    .createServer(
-      {
-        ...getSslArgs(),
-        rejectUnauthorized: false,
-        requestCert: true,
-      },
-      config.sslVerify
-        ? (req, res) => {
-            const cert = req.socket.getPeerCertificate();
-            if (!cert || !Object.keys(cert).length || cert?.serialNumber !== serialNumber) {
-              res.writeHead(404);
-              res.write("Not found");
-              res.end();
-              return;
-            }
-            return app(req, res);
+  const server = https
+  .createServer(
+    {
+      ...getSslArgs(),
+      rejectUnauthorized: false,
+      requestCert: true,
+    },
+    config.sslVerify
+      ? (req, res) => {
+          const cert = req.socket.getPeerCertificate();
+          if (!cert || !Object.keys(cert).length || cert?.serialNumber !== serialNumber) {
+            res.writeHead(404);
+            res.write("Not found");
+            res.end();
+            return;
           }
-        : app,
-    )
-    .listen(port, "0.0.0.0")
-    .addListener("listening", () => {
-      console.log(`Server started: PORT=${port} SSL`);
-    });
+          return app(req, res);
+        }
+      : app,
+  )
+  .listen(port, "0.0.0.0")
+  .addListener("listening", () => {
+    console.log(`Server started: PORT=${port} SSL`);
+  });
+  if (config.socketRestream) {
+    sockjsServer.installHandlers(server, { prefix: '/restream_listen', websocket: false });
+  }
 }
 
 if (config.port) {
-  http
+  const server = http
     .createServer(app)
     .listen(config.port, "0.0.0.0")
     .addListener("listening", () => {
       console.log(`Server started: PORT=${config.port}`);
     });
+  if (config.socketRestream) {
+    sockjsServer.installHandlers(server, { prefix: '/restream_listen', websocket: false });
+  }
 }
