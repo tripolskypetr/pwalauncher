@@ -209,7 +209,10 @@ if (config.cookieSecret) {
 if (config.redirectHttps) {
   app.use("*", (req, res, next) => {
     if (req.protocol !== "https") {
-      res.redirect("https://" + req.headers.host + req.path);
+      const url = new URL(req.url, "https://" + req.headers.host);
+      const port = config.sslPort || 443;
+      url.port = port;
+      res.redirect(url.toString());
       return;
     }
     next();
