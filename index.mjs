@@ -410,7 +410,7 @@ if (config.socketRestream) {
     });
   });
 
-  app.post("/restream_event", bodyParser.json(), (req, res) => {
+  app.post("/restream_emit", bodyParser.json(), (req, res) => {
     const userId = req.header("x-appwrite-webhook-user-id");
     const projectId = req.header("x-appwrite-webhook-project-id");
     const events = req.header("x-appwrite-webhook-events");
