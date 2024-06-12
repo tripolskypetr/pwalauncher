@@ -137,6 +137,16 @@ config.cookieSecretAllowed = config.cookieSecretAllowed ?? [
 ];
 config.ipBlacklist = config.ipBlacklist ?? [];
 
+{
+  const EventEmitter = require('events');
+  if (config.ports) {
+    EventEmitter.defaultMaxListeners += config.ports.length;
+  }
+  if (config.proxy) {
+    EventEmitter.defaultMaxListeners += config.proxy.length;
+  }
+}
+
 const { SECRET_COOKIE_KEY, SECRET_COOKIE_VALUE } = typeof config.cookieSecret === 'object' ? {
   SECRET_COOKIE_KEY: config.cookieSecret.key,
   SECRET_COOKIE_VALUE: config.cookieSecret.value,
@@ -303,6 +313,11 @@ config.ports?.forEach((port) => {
   });
   app.use(`/${port}`, middleware);
   app.use(`/${port}/*`, middleware);
+  app.on("mount", (parent) => {
+    parent.on("LISTENING", server => {
+      server.on("upgrade", middleware.upgrade)
+    })
+  })
 });
 
 config.proxy?.forEach(({ path, link }) => {
@@ -322,6 +337,11 @@ config.proxy?.forEach(({ path, link }) => {
       });
     },
   });
+  app.on("mount", (parent) => {
+    parent.on("LISTENING", server => {
+      server.on("upgrade", middleware.upgrade)
+    })
+  })
   app.use(endpoint, middleware);
   app.use(`${endpoint}/*`, middleware);
 });
