@@ -309,7 +309,7 @@ config.ports?.forEach((port) => {
       maxSockets: MAX_HTTP_AGENT_SOCKETS,
     }),
     changeOrigin: true,
-    ws: true,
+    ws: !config.disableWs,
     logger: portLogger,
     pathRewrite: (path, req) => {
       return path.replace(`/${port}`, "");
@@ -321,13 +321,15 @@ config.ports?.forEach((port) => {
       });
     },
   });
+  if (!config.disableWs) {
+    app.on("mount", (parent) => {
+      parent.on("LISTENING", server => {
+        server.on("upgrade", middleware.upgrade)
+      })
+    })
+  }
   app.use(`/${port}`, middleware);
   app.use(`/${port}/*`, middleware);
-  app.on("mount", (parent) => {
-    parent.on("LISTENING", server => {
-      server.on("upgrade", middleware.upgrade)
-    })
-  })
 });
 
 config.proxy?.forEach(({ path, link }) => {
@@ -338,7 +340,7 @@ config.proxy?.forEach(({ path, link }) => {
       maxSockets: MAX_HTTP_AGENT_SOCKETS,
     }),
     changeOrigin: true,
-    ws: true,
+    ws: !config.disableWs,
     logger: proxyLogger,
     onError: (err, req, res) => {
       proxyLogger.warn(err);
@@ -347,11 +349,13 @@ config.proxy?.forEach(({ path, link }) => {
       });
     },
   });
-  app.on("mount", (parent) => {
-    parent.on("LISTENING", server => {
-      server.on("upgrade", middleware.upgrade)
+  if (!config.disableWs) {
+    app.on("mount", (parent) => {
+      parent.on("LISTENING", server => {
+        server.on("upgrade", middleware.upgrade)
+      })
     })
-  })
+  }
   app.use(endpoint, middleware);
   app.use(`${endpoint}/*`, middleware);
 });
