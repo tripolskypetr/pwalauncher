@@ -395,11 +395,11 @@ app.use((error, req, res, next) => {
   });
 });
 
-process.once("uncaughtException", (error) => {
+process.on("uncaughtException", (error) => {
   errorLogger.error(serializeError(error));
 });
 
-process.once("unhandledRejection", (error) => {
+process.on("unhandledRejection", (error) => {
   throw error;
 });
 
