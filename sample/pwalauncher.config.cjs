@@ -33,7 +33,6 @@ module.exports = {
         value: "1",
     },
     socketRestream: true,
-    socketRestreamToken: "",
     disableWs: true,
     cookieSecretAllowed: ['/', '/index.html', '/favicon.ico'],
     ipBlacklist: ["95.173.136.72"],

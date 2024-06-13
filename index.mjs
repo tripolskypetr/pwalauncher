@@ -412,14 +412,6 @@ if (config.socketRestream) {
   const clients = [];
 
   sockjsServer.on('connection', (conn) => {
-    if (config.socketRestreamToken) {
-      const conn = conn.getToken();
-      const socket = conn.getSocket();
-      if (token !== config.socketRestreamToken) {
-        socket.close(403, "unauthorized");
-        return;
-      }
-    }
     clients.push(conn);
     conn.on('close', () => {
       const index = clients.indexOf(conn);
