@@ -7,6 +7,7 @@ import { createRequire } from "module";
 import * as uuid from "uuid";
 
 import https from "https";
+import http2 from "http2";
 import http from "http";
 import path from "path";
 import tls from "tls";
@@ -23,6 +24,9 @@ import sockjs from "sockjs";
 import nocache from "nocache";
 import jwt from "jsonwebtoken";
 import pino from "pino";
+
+import autopush from 'http2-express-autopush';
+import http2Express from 'http2-express-bridge';
 
 const require = createRequire(import.meta.url);
 
@@ -184,7 +188,7 @@ const getSslSerial = () => {
   return cert.serialNumber;
 };
 
-const app = express();
+const app = config.http2Port ? http2Express(express) : express();
 
 app.use((req, res, next) => {
   if (req.url === "/restream_listen") {
@@ -373,13 +377,38 @@ config.proxy?.forEach(({ path, link }) => {
   app.use(`${endpoint}/*`, middleware);
 });
 
-app.use(
-  (req, res, next) => {
-    fileLogger.info(req.url);
-    next();
-  },
-  express.static(path.join(process.cwd(), config.wwwroot)),
-);
+if (config.http2Port) {
+  const staticPath = path.join(process.cwd(), config.wwwroot);
+  const extensions = [
+    'html',
+    'json',
+    'js',
+    'svg',
+    'css',
+    'png',
+    'jpeg',
+    'svg',
+    'ico',
+    'ttf',
+  ];
+  app.use(
+    autopush(staticPath, { extensions }),
+    (req, res, next) => {
+      fileLogger.info(req.url);
+      next();
+    },
+    express.static(staticPath),
+  );
+} else {
+  app.use(
+    (req, res, next) => {
+      fileLogger.info(req.url);
+      next();
+    },
+    express.static(path.join(process.cwd(), config.wwwroot)),
+  );
+}
+
 
 app.get("*", (req, res) => {
   if (config.cookieSecretAllowed.includes(req.url)) {
@@ -445,8 +474,12 @@ if (config.socketRestream) {
   });
 }
 
-if (config.ssl) {
-  const port = config.sslPort || 443;
+if (config.sslPort) {
+  if (!config.ssl) {
+    console.log('SSL is unavailable due to ssl cert not provided');
+    process.exit(-1);
+  }
+  const port = config.sslPort;
   const serialNumber = getSslSerial();
   const server = https
   .createServer(
@@ -484,6 +517,41 @@ if (config.port) {
     .addListener("listening", () => {
       console.log(`Server started: PORT=${config.port}`);
     });
+  if (config.socketRestream) {
+    sockjsServer.installHandlers(server, { prefix: '/restream_listen', websocket: false });
+  }
+}
+
+if (config.http2Port) {
+  if (!config.ssl) {
+    console.log('HTTP2 is unavailable due to ssl cert not provided');
+    process.exit(-1);
+  }
+  const port = config.http2Port;
+  const serialNumber = getSslSerial();
+  const server = http2
+  .createSecureServer(
+    {
+      ...getSslArgs(),
+      allowHTTP1: true,
+    },
+    config.sslVerify
+      ? (req, res) => {
+          const cert = req.socket.getPeerCertificate();
+          if (!cert || !Object.keys(cert).length || cert?.serialNumber !== serialNumber) {
+            res.writeHead(404);
+            res.write("Not found");
+            res.end();
+            return;
+          }
+          return app(req, res);
+        }
+      : app,
+  )
+  .listen(port, "0.0.0.0")
+  .addListener("listening", () => {
+    console.log(`Server started: PORT=${port} HTTP2`);
+  });
   if (config.socketRestream) {
     sockjsServer.installHandlers(server, { prefix: '/restream_listen', websocket: false });
   }
