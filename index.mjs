@@ -451,9 +451,10 @@ if (config.socketRestream) {
   });
 
   emitter.on('event', (data) => {
+    const chunk = JSON.stringify(data);
+    restreamLogger.info(data);
     clients.forEach((client) => {
-      restreamLogger.info(data);
-      client.write(JSON.stringify(data));
+      client.write(chunk);
     });
   });
 
